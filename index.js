@@ -9,7 +9,7 @@ server.auth((accept, reject, handshake) => {
     // accept the incoming client
     accept({
         // anything passed to accept() will be attached as a 'session' property of the client.
-        sessionId: 'XYZ123'
+        sessionId: 'TESTxYZ123'
     });
 });
 
@@ -54,4 +54,4 @@ server.on('client', async (client) => {
     });
 });
 
- server.listen(3000).then(()=>console.log("connected"));
+ server.listen(9000).then(()=>console.log("connected"));
