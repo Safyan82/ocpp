@@ -1,43 +1,57 @@
-const WebSocket = require('ws');
-const { handleBootNotification, handleAuthorize, handleStartTransaction } = require('./handler/ocpp-handler');
+const { RPCServer, createRPCError } = require('ocpp-rpc');
 
-const wss = new WebSocket.Server({ port: 9000 });
-
-function sendMessage(ws, message) {
-  ws.send(JSON.stringify(message));
-}
-
-wss.on('connection', (ws) => {
-  console.log('Charging station connected.');
-
-  ws.on('message', (message) => {
-    console.log('Received message:', message);
-
-    try {
-      const parsedMessage = JSON.parse(message);
-
-      // Handle OCPP messages based on their message type
-      switch (parsedMessage.action) {
-        case 'BootNotification':
-          handleBootNotification(ws, parsedMessage, sendMessage);
-          break;
-        case 'Authorize':
-          handleAuthorize(ws, parsedMessage);
-          break;
-        case 'StartTransaction':
-          handleStartTransaction(ws, parsedMessage);
-          break;
-        // Add more cases for other OCPP messages as needed
-        default:
-          console.log('Unsupported message type:', parsedMessage.action);
-          break;
-      }
-    } catch (error) {
-      console.error('Error parsing message:', error);
-    }
-  });
-
-  ws.on('close', () => {
-    console.log('Charging station disconnected.');
-  });
+const server = new RPCServer({
+    protocols: ['ocpp1.6'], // server accepts ocpp1.6 subprotocol
+    strictMode: true,       // enable strict validation of requests & responses
 });
+
+server.auth((accept, reject, handshake) => {
+    // accept the incoming client
+    accept({
+        // anything passed to accept() will be attached as a 'session' property of the client.
+        sessionId: 'XYZ123'
+    });
+});
+
+server.on('client', async (client) => {
+    console.log(`${client.session.sessionId} connected!`); // `XYZ123 connected!`
+
+    // create a specific handler for handling BootNotification requests
+    client.handle('BootNotification', ({params}) => {
+        console.log(`Server got BootNotification from ${client.identity}:`, params);
+
+        // respond to accept the client
+        return {
+            status: "Accepted",
+            interval: 300,
+            currentTime: new Date().toISOString()
+        };
+    });
+    
+    // create a specific handler for handling Heartbeat requests
+    client.handle('Heartbeat', ({params}) => {
+        console.log(`Server got Heartbeat from ${client.identity}:`, params);
+
+        // respond with the server's current time.
+        return {
+            currentTime: new Date().toISOString()
+        };
+    });
+    
+    // create a specific handler for handling StatusNotification requests
+    client.handle('StatusNotification', ({params}) => {
+        console.log(`Server got StatusNotification from ${client.identity}:`, params);
+        return {params};
+    });
+
+    // create a wildcard handler to handle any RPC method
+    client.handle(({method, params}) => {
+        // This handler will be called if the incoming method cannot be handled elsewhere.
+        console.log(`Server got ${method} from ${client.identity}:`, params);
+
+        // throw an RPC error to inform the server that we don't understand the request.
+        throw createRPCError("NotImplemented");
+    });
+});
+
+ server.listen(3000).then(()=>console.log("connected"));
