@@ -1,7 +1,7 @@
 const { RPCClient } = require('ocpp-rpc');
 
 const cli = new RPCClient({
-    endpoint: 'ws://localhost:3000', // the OCPP endpoint URL
+    endpoint: 'ws://localhost:9000', // the OCPP endpoint URL
     identity: 'EXAMPLE',             // the OCPP identity
     protocols: ['ocpp1.6'],          // client understands ocpp1.6 subprotocol
     strictMode: true,                // enable strict validation of requests & responses
@@ -22,7 +22,9 @@ const test = async()=>{
     if (bootResponse.status === 'Accepted') {
         
         // send a Heartbeat request and await the response
-        const heartbeatResponse = await cli.call('Heartbeat', {});
+        const heartbeatResponse = await cli.call('Heartbeat', {
+            heartbeat: "from"
+        });
         // read the current server time from the response
         console.log(
             '\nServer time is', heartbeatResponse.currentTime, 
