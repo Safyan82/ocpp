@@ -1,10 +1,11 @@
 // const producer = require("./util/kafka.config");
 // const server = require("./util/ocpp.config");
+const { RPCServer, createRPCError } = require('ocpp-rpc');
+const { Kafka } = require('kafkajs')
 const { createClient } = require('redis');
 const allClients = new Map();
 
 
-const { Kafka } = require('kafkajs')
 
 const kafka = new Kafka({
     brokers: ['proud-polliwog-14909-eu1-kafka.upstash.io:9092'],
@@ -20,7 +21,6 @@ const kafka = new Kafka({
 
 const producer = kafka.producer();
 
-const { RPCServer, createRPCError } = require('ocpp-rpc');
 
 const server = new RPCServer({
     protocols: ['ocpp1.6', 'ocpp2.0.1'], // server accepts ocpp1.6 subprotocol
