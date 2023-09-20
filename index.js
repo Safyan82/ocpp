@@ -1,8 +1,31 @@
-const producer = require("./util/kafka.config");
-const server = require("./util/ocpp.config");
+// const producer = require("./util/kafka.config");
+// const server = require("./util/ocpp.config");
 const { createClient } = require('redis');
 const allClients = new Map();
 
+
+const { Kafka } = require('kafkajs')
+
+const kafka = new Kafka({
+    brokers: ['proud-polliwog-14909-eu1-kafka.upstash.io:9092'],
+    // brokers: ['logical-macaw-6883-eu1-kafka.upstash.io:9092'],
+    sasl: {
+      mechanism: 'scram-sha-256',
+      username: 'cHJvdWQtcG9sbGl3b2ctMTQ5MDkk-S_8xClKhcoxZWs8UacxqbMGNonjCif3_3o',
+      password: 'YmFhM2NkODQtODRiNC00YzRiLTgyMzYtYWI0YTAzMDYwNWYx',
+    },
+    ssl: true,
+});
+
+
+const producer = kafka.producer();
+
+const { RPCServer, createRPCError } = require('ocpp-rpc');
+
+const server = new RPCServer({
+    protocols: ['ocpp1.6', 'ocpp2.0.1'], // server accepts ocpp1.6 subprotocol
+    strictMode: false,       // enable strict validation of requests & responses
+});
 
 // server.auth((accept, reject, handshake) => {
 //     // accept the incoming client
@@ -21,14 +44,14 @@ server.on('client', async (client) => {
 
 
 
-    // const currentClient = allClients.get(client.identity);
-    // if(currentClient){
-    //     console.log("Client already exist");
-    // }else{
-    //     console.log("err");
-    // }
+    const currentClient = allClients.get(client.identity);
+    if(currentClient){
+        console.log("Client already exist");
+    }else{
+        console.log("err");
+    }
     
-    // allClients.set(client.identity, client);
+    allClients.set(client.identity, client);
     
 
 
