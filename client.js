@@ -1,8 +1,8 @@
 const { RPCClient } = require('ocpp-rpc');
 
 const cli = new RPCClient({
-    endpoint: 'ws://localhost:9000', // the OCPP endpoint URL
-    identity: 'EXAMPLE',             // the OCPP identity
+    endpoint: 'ws://3.17.180.226:9000', // the OCPP endpoint URL
+    identity: '1234 example',             // the OCPP identity
     protocols: ['ocpp1.6'],          // client understands ocpp1.6 subprotocol
     strictMode: true,                // enable strict validation of requests & responses
 });
