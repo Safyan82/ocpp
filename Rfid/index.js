@@ -8,6 +8,5 @@ server.on('Authorize', (chargingStation, data) => {
     } else {
       console.log('Transaction started without an RFID card');
       // Handle the case where no RFID card is presented.
-      // You may deny the transaction or follow your business logic.
     }
 });

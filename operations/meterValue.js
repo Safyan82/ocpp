@@ -13,9 +13,9 @@ server.on('Authorize', (chargingStation, data) => {
 });
 
 server.on('MeterValues', (chargingStation, data) => {
-    console.log('Meter Values received from station', chargingStation.id);
-    // Handle Meter Values
     const { connectorId, values } = data;
-    console.log(`Meter values for Connector ${connectorId}:`, values);
-    // You can process and store meter values here.
+    const energyDelivered = values.find((value) => value.measurand === 'Energy.Active.Import.Register');
+    if (energyDelivered) {
+      energyConsumed = energyDelivered.value;
+    }
 });
